@@ -8,7 +8,7 @@ const { spawnSync } = require("child_process");
 class Main {
     constructor() {
         this.codeRunner()
-            .then((data) => console.log("data => ", data))
+            .then((data) => console.log("Have a nice time :)"))
             .catch((err) => console.log("err => ", err));
     }
 
@@ -16,13 +16,12 @@ class Main {
         const pullFromBranch = await this.getPullFromBranch();
         const currentBranch = this.getCurrentBranch();
         this.pullFromRemote(pullFromBranch, currentBranch);
-        this.commit();
+        await this.commit();
         this.commandRunner("git", ["push"]);
     }
 
     commandRunner(command, options = []) {
         const result = spawnSync(command, options);
-        console.log(result);
 
         if (result.status !== 0) {
             console.log("operation failed");
@@ -34,9 +33,9 @@ class Main {
 
     async promptsRunner(promptList = []) {
         const response = await prompts.prompt(promptList, {
-            oncancel: this.onCancel(),
+            onCancel: this.onCancel,
         });
-        console.log(response);
+        // const response = await prompts.prompt(promptList);
         return response;
     }
 
@@ -96,8 +95,8 @@ class Main {
         this.commandRunner("git", ["merge", remoteBranch]);
         console.log(`merge ${remoteBranch} into ${currentBranch}`);
 
-        this.commandRunner("git", ["stash", "apply"]);
-        console.log("apply stash");
+        this.commandRunner("git", ["stash", "pop"]);
+        console.log("pop stash");
 
         this.commandRunner("git", ["add", "."]);
         console.log("stage all changes");
@@ -133,7 +132,7 @@ class Main {
 
         const username = this.getGitUsername();
 
-        commitStructure = `(${username}) ${commitType} (${commitScope}): ${commitMessage}`;
+        const commitStructure = `(${username}) ${commitType} (${commitScope}): ${commitMessage}`;
         console.log(commitStructure);
 
         this.commandRunner("git", ["commit", "-m", commitStructure]);
